@@ -10,6 +10,7 @@ const Gallery = () => {
   const [filter, setFilter] = useState<string>('All');
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const lightboxRef = useRef<PhotoSwipeLightbox | null>(null);
 
   // Load images from Cloudinary
@@ -90,6 +91,18 @@ const Gallery = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <motion.div
+              className="w-16 h-16 border-4 border-primary-500/30 border-t-primary-500 rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            />
+            <p className="mt-6 text-neutral-400 text-lg">Loading gallery...</p>
+          </div>
+        )}
+
         {/* Gallery Grid */}
         <div id="gallery-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredImages.map((image, index) => {
@@ -112,12 +125,20 @@ const Gallery = () => {
                     ease: 'easeOut'
                   }}
                 >
+                  {/* Loading skeleton */}
+                  {!loadedImages.has(image.id) && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-neutral-800 to-neutral-900 animate-pulse" />
+                  )}
+                  
                   <img
                     src={image.src.replace('/f_auto,q_auto/', '/f_auto,q_auto,w_800,c_fill/')}
                     alt={image.alt}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onLoad={() => setLoadedImages(prev => new Set(prev).add(image.id))}
+                    className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
+                      loadedImages.has(image.id) ? 'opacity-100' : 'opacity-0'
+                    }`}
                   />
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300 pointer-events-none">

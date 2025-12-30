@@ -9,7 +9,7 @@ const Home = () => {
   const fadeIn = {
     initial: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+    transition: { duration: 0.4, ease: 'easeOut' as const }
   };
 
   return (
